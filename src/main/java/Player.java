@@ -26,24 +26,32 @@ class Player {
             }
 
             if (graph.containsKey(node2.getId())) {
-                graph.get(node1.getId()).addLinkTo(node2);
+                graph.get(node2.getId()).addLinkTo(node1);
             } else {
                 graph.put(node2.getId(), node2);
             }
-
         }
 
         // Set exit nodes into graph
         for (int i = 0; i < exits; i++) {
             int nodeId = in.nextInt();
-            graph.get(nodeId).setExitNode(true);
+            Node exitNodeId = graph.get(nodeId);
+            Node tempNode = new Node(exitNodeId.getId(), exitNodeId.getLinksTo());
+
+            exitNodeId.setExitNode(true);
+
+            for (Map.Entry<Integer, Node> integerNodeEntry : graph.entrySet()) {
+                Node value = integerNodeEntry.getValue();
+
+                if(value.getLinksTo().remove(tempNode)){
+                    value.getLinksTo().add(exitNodeId);
+                }
+            }
         }
-        System.err.println("graph..." + graph);
 
         // game loop
         while (true) {
             Node skyNetNode = graph.get(in.nextInt()); // The index of the node on which the Skynet agent is positioned this turn
-            System.err.println("agent..." + skyNetNode.getId() + " " + skyNetNode.getLinksTo());
             System.out.println(skyNetNode.getId() + " " + getExitNodeFromAgentNode(skyNetNode));
         }
     }
@@ -58,40 +66,37 @@ class Player {
     }
 }
 
-
 class Node {
     private Integer id;
     private Set<Node> linksTo;
-    private boolean isExisNode;
+    private boolean isExitNode;
 
     public Node(int id) {
         this.id = id;
         this.linksTo = new HashSet<>();
-        this.isExisNode = false;
+        this.isExitNode = false;
+    }
+
+    public Node(int id, Set<Node> linksTo) {
+        this.id = id;
+        this.linksTo = linksTo;
+        this.isExitNode = false;
     }
 
     public boolean isExitNode() {
-        return isExisNode;
+        return isExitNode;
     }
 
     public void setExitNode(boolean exisNode) {
-        isExisNode = exisNode;
+        isExitNode = exisNode;
     }
 
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     public Set<Node> getLinksTo() {
         return linksTo;
-    }
-
-    public void setLinksTo(Set<Node> linksTo) {
-        this.linksTo = linksTo;
     }
 
     public void addLinkTo(Node node) {
@@ -100,10 +105,22 @@ class Node {
 
     @Override
     public String toString() {
-        List<Integer> linkToIds = new ArrayList<>(linksTo.size());
+        List<String> linkToIds = new ArrayList<>(linksTo.size());
         for (Node node : linksTo) {
-            linkToIds.add(node.getId());
+            linkToIds.add(node.getId() + " " + node.isExitNode());
         }
         return "id: " + id + " isExit: " + isExitNode() + " linksTo: " + Arrays.toString(linkToIds.toArray()) + "\n";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Node &&
+                id.equals(((Node)obj).getId()) &&
+                (isExitNode == (((Node)obj).isExitNode()));
+    }
+
+    @Override
+    public int hashCode() {
+        return id * 13;
     }
 }
