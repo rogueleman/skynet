@@ -38,11 +38,12 @@ class Player {
             int nodeId = in.nextInt();
             graph.get(nodeId).setExitNode(true);
         }
+        System.err.println("graph..." + graph);
 
         // game loop
         while (true) {
             Node skyNetNode = graph.get(in.nextInt()); // The index of the node on which the Skynet agent is positioned this turn
-
+            System.err.println("agent..." + skyNetNode.getId() + " " + skyNetNode.getLinksTo());
             System.out.println(skyNetNode.getId() + " " + getExitNodeFromAgentNode(skyNetNode));
         }
     }
@@ -99,6 +100,10 @@ class Node {
 
     @Override
     public String toString() {
-        return "\n id: " + id + " isExit: " + isExitNode();
+        List<Integer> linkToIds = new ArrayList<>(linksTo.size());
+        for (Node node : linksTo) {
+            linkToIds.add(node.getId());
+        }
+        return "id: " + id + " isExit: " + isExitNode() + " linksTo: " + Arrays.toString(linkToIds.toArray()) + "\n";
     }
 }
