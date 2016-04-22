@@ -52,14 +52,12 @@ class Player {
             exitList.add(exitNode);
         }
         // game loop
-        Set<Link> agentPassedLinks = new HashSet<>();
+        Set<Link> agentPassedLinks = new LinkedHashSet<>();
         Integer agentCurrentNode = -1;
-        Integer agentBeforeNode = -1;
+        Integer agentBeforeNode;
         while (true) {
             Node skyNetNode = graph.get(in.nextInt()); // The index of the node on which the Skynet agent is positioned this turn
             boolean addToSet = true;
-
-            if (agentBeforeNode != agentCurrentNode) {
                 agentBeforeNode = agentCurrentNode;
                 agentCurrentNode = skyNetNode.getId();
                 if (agentCurrentNode < agentBeforeNode) {
@@ -67,15 +65,18 @@ class Player {
                     agentCurrentNode = agentBeforeNode;
                     agentBeforeNode = tmp;
                 }
+                if (agentBeforeNode > 0 && agentCurrentNode > 0)
                 addToSet = agentPassedLinks.add(new Link(agentBeforeNode, agentCurrentNode));
-            }
-
             System.err.println("agentPassedLinks..." + agentPassedLinks);
-
+            System.err.println("addToSet..." + addToSet);
+            System.err.println("Link..." + new Link(agentBeforeNode, agentCurrentNode));
             if (!addToSet) {
                 ArrayList<Link> linksList = new ArrayList<>(agentPassedLinks);
                 int i = linksList.indexOf(new Link(agentBeforeNode, agentCurrentNode));
-                Link nextLink = linksList.get(3);
+                System.err.println("linksList..." + linksList);
+                System.err.println("i..." + i);
+                Link nextLink = linksList.get(i - 2);
+                agentPassedLinks.remove(nextLink);
                 System.out.println(nextLink.getLeft() + " " + nextLink.getRight());
             }
             agentCurrentNode = skyNetNode.getId();
